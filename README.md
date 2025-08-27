@@ -1,7 +1,8 @@
 # S3 Explorer
+
 ---
 
-# Licence
+## Licence
 
 ![Variants of the GPLv3 logo by José Obed](https://www.gnu.org/graphics/gplv3-rounded-red-180x60.jpg "GPLv3 logo")
 
