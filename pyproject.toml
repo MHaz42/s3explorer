@@ -1,0 +1,14 @@
+[project]
+
+name = "S3Explorer"
+version = "0.0.1"
+license = "GPLv3"
+license-files = ["LICENSE"]
+dependencies = ["textual"]
+authors = [
+    { name = "Bouchet Matéo", email = "mateo.bouchet@mhaz42.fr" },
+    { name = "Conde Cyril", email = "cyril.conde@gmail.com" },
+]
+
+[project.scripts]
+s3explorer = "s3explorer:S3Explorer"
