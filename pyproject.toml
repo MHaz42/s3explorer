@@ -21,3 +21,6 @@ Issues = "https://github.com/MHaz42/s3explorer/issues"
 
 [project.scripts]
 s3explorer = "s3explorer:S3Explorer"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/s3explorer"]
