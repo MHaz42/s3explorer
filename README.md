@@ -1,6 +1,10 @@
 # S3 Explorer
 
----
+:construction: **Currently in development** :construction:
+
+## IDEAS
+
+Take a look at [this](docs/ideas.md)
 
 ## Licence
 
