@@ -1,0 +1,31 @@
+#app {
+    layout: grid;
+    grid-size: 2;
+    grid-rows: 3 1fr;
+    grid-columns: 20% 1fr;
+    grid-gutter: 1;
+    margin: 1 2;
+}
+
+#patheditor {
+    layout: grid;
+    grid-size: 2 1;
+    height: 3;
+    grid-columns: 7 1fr;
+    column-span: 2
+}
+
+#patheditorlabel {
+    width: 7;
+    height: 3;
+    content-align: center middle;
+}
+
+#patheditorinput {
+}
+
+#explorer {
+}
+
+#bookmarks {
+}
