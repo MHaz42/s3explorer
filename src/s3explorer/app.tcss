@@ -1,7 +1,7 @@
 #app {
     layout: grid;
-    grid-size: 2;
-    grid-rows: 3 1fr;
+    grid-size: 2 3;
+    grid-rows: 1 3 1fr;
     grid-columns: 20% 1fr;
     grid-gutter: 1;
     margin: 1 2;
@@ -25,7 +25,18 @@
 }
 
 #explorer {
+    width: 100%
 }
 
 #bookmarks {
+}
+
+#header {
+    column-span: 2;
+    content-align: left middle;
+    height: 2;
+}
+
+.box {
+    
 }
