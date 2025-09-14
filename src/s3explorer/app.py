@@ -6,7 +6,7 @@ from textual.containers import Container
 class S3Explorer(App):
     """A Textual app to explore s3 buckets"""
 
-    CSS_PATH = "main.tcss"
+    CSS_PATH = "app.tcss"
 
     TITLE = "S3Explorer"
 
@@ -23,12 +23,3 @@ class S3Explorer(App):
             id="app",
         )
         yield Footer()
-
-
-def main():
-    app = S3Explorer()
-    app.run()
-
-
-if __name__ == "__main__":
-    main()
