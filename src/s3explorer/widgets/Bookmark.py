@@ -22,10 +22,6 @@ class Bookmark(ListView):
             user_config_dir.mkdir(parents=True, exist_ok=True)
         return user_config_dir
     
-    def clear_bookmark(self) -> None:
-        """Clear bookmark list in order to be able to load another list if it exists"""
-        self.clear()
-    
     def load_bookmark(self, bucket_name: str) -> None:
         """
         Load bookmark from user config diretory.
@@ -42,7 +38,7 @@ class Bookmark(ListView):
             }
         """
         
-        self.clear_bookmark()
+        self.clear()
         
         user_config_dir = self.get_user_config_dir()
         bookmark_file = user_config_dir / f"bookmarks.json"
@@ -61,8 +57,8 @@ class Bookmark(ListView):
             for i, bookmark in enumerate(bucket_bookmark["bookmarks"]):
                 name = Label(bookmark["name"])
                 value = bookmark["value"]
-                id = f"BM{i}"
-                self.append(BookmarkListItem(name, id=id, value=value))
+                bookmark_id = f"BM{i}"
+                self.append(BookmarkListItem(name, id=bookmark_id, value=value))
         else:
             self.logger.debug(f"Creating bookmark file at {bookmark_file}")
             bookmark_file.touch()
