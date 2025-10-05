@@ -1,3 +1,5 @@
+import logging
+
 from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Input, Label, Select, ListView, ListItem
@@ -5,7 +7,7 @@ from textual.containers import Container
 
 from s3explorer.s3 import S3
 from s3explorer.version import VERSION
-from s3explorer.widgets import ExplorerTable
+from s3explorer.widgets import ExplorerTable, Bookmark, BookmarkListItem
 
 
 class S3Explorer(App):
@@ -14,6 +16,8 @@ class S3Explorer(App):
     CSS_PATH = "styles/app.tcss"
 
     TITLE = "S3Explorer"
+    
+    logger = logging.getLogger("Bookmark")
 
     s3_client = S3()
 
@@ -30,10 +34,9 @@ class S3Explorer(App):
                 Input(id="patheditorinput", placeholder="S3 path here"),
                 id="patheditor",
             ),
-            ListView(
-                ListItem(Label("Bookmark1")),
+            Bookmark(
                 id="bookmarks",
-                name="Bookmarks",
+                name="Bookmarks"
             ),
             ExplorerTable(id="explorer", bucket=self.s3_client.list_bucket()[0]),
             id="app",
@@ -47,5 +50,17 @@ class S3Explorer(App):
 
     @on(Select.Changed)
     def select_changed(self, event: Select.Changed) -> None:
+        self.logger.info(f"{event.value = }")
         table = self.query_one(ExplorerTable)
         table.update_bucket(str(event.value))
+        bookmark = self.query_one(Bookmark)
+        bookmark.load_bookmark(str(event.value))
+    
+    @on(Bookmark.Selected)
+    def bookmark_selected(self, event: Bookmark.Selected) -> None:
+        self.logger.info(f"Enter pressed on Bookmark: {event.item.value = }")
+        bookmark_path = event.item.value
+        input_widget = self.query_one(Input)
+        input_widget.clear()
+        input_widget.insert(bookmark_path, 0)
+        input_widget.post_message(input_widget.Submitted(input_widget, bookmark_path))
