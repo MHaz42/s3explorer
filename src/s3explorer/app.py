@@ -40,12 +40,12 @@ class S3Explorer(App):
         )
         yield Footer()
 
-    def on_explorer_table_path_update(self, message: ExplorerTable.PathUpdate) -> None:
-        input = self.query_one(Input)
-        input.value = message.path
+    @on(ExplorerTable.PathUpdate)
+    def explorer_table_path_update(self, message: ExplorerTable.PathUpdate) -> None:
+        input_widget = self.query_one(Input)
+        input_widget.value = message.path
 
     @on(Select.Changed)
     def select_changed(self, event: Select.Changed) -> None:
-        print(event.value)
         table = self.query_one(ExplorerTable)
         table.update_bucket(str(event.value))
