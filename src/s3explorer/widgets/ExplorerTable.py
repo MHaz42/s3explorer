@@ -37,7 +37,7 @@ class ExplorerTable(DataTable):
             self.path = path
             super().__init__()
 
-    def update_content(self, path: str = ""):
+    def update_path(self, path: str = ""):
         self.directory_structure = self.s3_client.list_directory_content(
             self.bucket, path
         )
@@ -56,7 +56,7 @@ class ExplorerTable(DataTable):
     def update_bucket(self, new_bucket: str):
         self.bucket = new_bucket
         self.path = []
-        self.update_content()
+        self.update_path()
         self.post_message(self.PathUpdate("".join(self.path)))
 
     def on_resize(self, event: Resize) -> None:
@@ -74,7 +74,7 @@ class ExplorerTable(DataTable):
         self.add_column("filename", key="filename")
         self.add_column("last edited", width=30)
         self.add_column("size", width=10)
-        self.update_content()
+        self.update_path()
 
     def action_sort_by_filename(self) -> None:
         if self.current_sort != "filename":
@@ -94,6 +94,6 @@ class ExplorerTable(DataTable):
         else:
             return None
         print(self.path)
-        self.update_content("".join(self.path or ""))
+        self.update_path("".join(self.path or ""))
         self.post_message(self.PathUpdate("".join(self.path)))
         self.move_cursor(row=1 if self.path else 0)
