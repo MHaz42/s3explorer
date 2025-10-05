@@ -17,6 +17,10 @@ class S3Explorer(App):
 
     TITLE = "S3Explorer"
     
+    BINDINGS = [
+        ("ctrl+b", "add_bookmark", "Add bookmark"),
+    ]
+    
     logger = logging.getLogger("Bookmark")
 
     s3_client = S3()
@@ -64,3 +68,14 @@ class S3Explorer(App):
         input_widget.clear()
         input_widget.insert(bookmark_path, 0)
         input_widget.post_message(input_widget.Submitted(input_widget, bookmark_path))
+    
+    def action_add_bookmark(self) -> None:
+        # TODO: Create a new dialog with an Input to ask user for the bookmark name
+        select_widget = self.query_one(Select)
+        bucket_name = select_widget.value
+        input_widget = self.query_one(Input)
+        bookmark_value = input_widget.value
+        bookmark_name = ""
+        
+        bookmark_widget = self.query_one(Bookmark)
+        bookmark_widget.add_bookmark(bucket_name, bookmark_name, bookmark_value)
