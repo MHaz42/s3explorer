@@ -7,7 +7,7 @@ name = "s3explorer"
 version = "0.0.2"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
-dependencies = ["textual", "boto3"]
+dependencies = ["textual", "boto3", "humanize"]
 authors = [
     { name = "Bouchet Matéo", email = "mateo.bouchet@mhaz42.fr" },
     { name = "Conde Cyril", email = "cyril.conde@gmail.com" },

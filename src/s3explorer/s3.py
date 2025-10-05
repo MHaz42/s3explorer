@@ -1,7 +1,10 @@
 from pathlib import Path
 from configparser import ConfigParser
+from typing import Dict
 
 import boto3
+
+from s3explorer.entities import FileDescription, FileType
 
 
 class S3:
@@ -25,24 +28,20 @@ class S3:
         return bucket_list
 
     def list_directory_content(self, bucket, path):
-        directory_content = []
+        directory_content: Dict[str, FileDescription] = {}
         result = self._s3_client.list_objects_v2(
             Bucket=bucket, Prefix=path, Delimiter="/"
         )
+        print(result)
+        if path != "":
+            directory_content[".."] = FileDescription(FileType.RETURN)
         for file in result.get("Contents", []):
-            directory_content.append(
-                {
-                    "type": "file",
-                    "key": file["Key"],
-                    "size": file["Size"],
-                    "last_modified": file["LastModified"],
-                }
+            directory_content[file["Key"].replace(path, "")] = FileDescription(
+                FileType.FILE, file["Size"], file["LastModified"]
             )
         for directory in result.get("CommonPrefixes", []):
-            directory_content.append(
-                {
-                    "type": "directory",
-                    "key": directory["Prefix"].replace(path, "").strip("/"),
-                }
+            directory_content[directory["Prefix"].replace(path, "").strip("/")] = (
+                FileDescription(FileType.DIRECTORY)
             )
+
         return directory_content

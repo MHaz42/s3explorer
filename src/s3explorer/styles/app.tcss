@@ -9,9 +9,9 @@
 
 #patheditor {
     layout: grid;
-    grid-size: 2 1;
+    grid-size: 3 1;
     height: 3;
-    grid-columns: 7 1fr;
+    grid-columns: 7 20 1fr;
     column-span: 2
 }
 
@@ -35,8 +35,4 @@
     column-span: 2;
     content-align: left middle;
     height: 2;
-}
-
-.box {
-    
 }
