@@ -30,7 +30,7 @@ class Bookmark(ListView):
 
     def get_bookmark_file(self) -> Path:
         user_config_dir = self.get_user_config_dir()
-        bookmark_file = user_config_dir / f"bookmarks.json"
+        bookmark_file = user_config_dir / "bookmarks.json"
         if not bookmark_file.exists():
             self.logger.debug(f"Creating bookmark file at {bookmark_file}")
             bookmark_file.touch()
@@ -100,6 +100,6 @@ class BookmarkListItem(ListItem):
         
         __slots__ = ("value", )
         
-        def __init__(self, *children, name = None, id = None, classes = None, disabled = False, markup = True, value = None):
+        def __init__(self, *children, name = None, id = None, classes = None, disabled = False, markup = True, value: str = ""):
             super().__init__(*children, name=name, id=id, classes=classes, disabled=disabled, markup=markup)
-            self.value: str = value
+            self.value = value
