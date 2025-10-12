@@ -20,7 +20,6 @@ class ExplorerTable(DataTable):
     s3_client = S3()
     bucket = ""
     directory_structure: Dict[str, FileDescription] = {}
-    path = []
 
     BINDINGS = [
         ("ctrl+f", "sort_by_filename", "Sort by FileName"),
@@ -31,15 +30,18 @@ class ExplorerTable(DataTable):
         super().__init__(id=id)
         self.bucket = bucket
 
-    # Class for sending messages to parent to update Path Input widget
-    class PathUpdate(Message):
-        def __init__(self, path: str):
-            self.path = path
+    class NavigateBack(Message):
+        def __init__(self) -> None:
             super().__init__()
 
-    def update_path(self, path: str = ""):
+    class NavigateForward(Message):
+        def __init__(self, new_dir_level: str) -> None:
+            self.new_dir_level = new_dir_level
+            super().__init__()
+
+    def update_path(self, new_path: str = ""):
         self.directory_structure = self.s3_client.list_directory_content(
-            self.bucket, path
+            self.bucket, new_path
         )
         self.clear()
         for filename, file_desc in self.directory_structure.items():
@@ -52,12 +54,10 @@ class ExplorerTable(DataTable):
             "filename",
             key=lambda filename: filename.lower(),
         )
+        self.move_cursor(row=1 if new_path else 0)
 
     def update_bucket(self, new_bucket: str):
         self.bucket = new_bucket
-        self.path = []
-        self.update_path()
-        self.post_message(self.PathUpdate("".join(self.path)))
 
     def on_resize(self, event: Resize) -> None:
         self.columns[ColumnKey("filename")].auto_width = False
@@ -88,12 +88,8 @@ class ExplorerTable(DataTable):
     def action_enter_dir(self) -> None:
         filename = self.get_row_at(self.cursor_row)[0]
         if self.directory_structure[filename].type == FileType.DIRECTORY:
-            self.path.append(filename + "/")
+            self.post_message(self.NavigateForward(filename))
         elif self.directory_structure[filename].type == FileType.RETURN:
-            self.path.pop()
+            self.post_message(self.NavigateBack())
         else:
             return None
-        print(self.path)
-        self.update_path("".join(self.path or ""))
-        self.post_message(self.PathUpdate("".join(self.path)))
-        self.move_cursor(row=1 if self.path else 0)
