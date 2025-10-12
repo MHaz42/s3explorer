@@ -15,7 +15,11 @@ class Bookmark(ListView):
     
     logger = logging.getLogger("Bookmark")
     
-    # TODO: Reimplement ListView.Selected in order to return a BookmarkListItem instead of ListItem
+    class Selected(ListView.Selected):
+        def __init__(self, list_view, item, index):
+            self.item: BookmarkListItem = item
+            """The selected item."""
+            super().__init__(list_view, item, index)
     
     def get_user_config_dir(self) -> Path:
         """Return the user config directory for this application"""
@@ -98,4 +102,4 @@ class BookmarkListItem(ListItem):
         
         def __init__(self, *children, name = None, id = None, classes = None, disabled = False, markup = True, value = None):
             super().__init__(*children, name=name, id=id, classes=classes, disabled=disabled, markup=markup)
-            self.value = value
+            self.value: str = value
