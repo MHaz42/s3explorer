@@ -3,17 +3,45 @@ import json
 
 from pathlib import Path
 
+from textual import on
 from textual.widgets import (
     ListView,
     ListItem,
-    Label
+    Label,
+    Input,
+    Select
 )
+from textual.screen import Screen
+
+
+class AddBookmarkScreen(Screen[str]):
+    def compose(self):
+        yield Label("Enter a name for the bookmark:", id="add_bookmark_user_msg")
+        yield Input(id="add_bookmark_user_input", placeholder="Input bookmark name here")
+    
+    @on(Input.Submitted)
+    def input_submitted(self, event: Input.Submitted) -> None:
+        self.dismiss(event.input.value)
+
+
+class BookmarkListItem(ListItem):
+        """ A bookmark item """
+        
+        __slots__ = ("value", )
+        
+        def __init__(self, *children, name = None, id = None, classes = None, disabled = False, markup = True, value: str = ""):
+            super().__init__(*children, name=name, id=id, classes=classes, disabled=disabled, markup=markup)
+            self.value = value
 
 
 class Bookmark(ListView):
     """Bookmark manager"""
     
     logger = logging.getLogger("Bookmark")
+    
+    BINDINGS = [
+        ("delete", "remove_bookmark", "Remove highligthed bookamrk"),
+    ]
     
     class Selected(ListView.Selected):
         def __init__(self, list_view, item, index):
@@ -49,7 +77,7 @@ class Bookmark(ListView):
         
         self.logger.debug(f"Writing bookmarks to {bookmark_file}")
         with open(bookmark_file, "w") as fd:
-            json.dump(bookmarks, fd)
+            json.dump(bookmarks, fd, indent=2)
     
     def load_bookmark(self, bucket_name: str) -> None:
         """
@@ -74,32 +102,41 @@ class Bookmark(ListView):
         try:
             bucket_bookmark = bookmarks[bucket_name]
         except KeyError:
-            # No bookmark for this bucket
+            self.logger.info(f"No bookmark found for bucket: {bucket_name}")
             return
-            
+        
         for i, bookmark in enumerate(bucket_bookmark["bookmarks"]):
             name = Label(bookmark["name"])
             value = bookmark["value"]
-            bookmark_id = f"BM{i}"
-            self.append(BookmarkListItem(name, id=bookmark_id, value=value))
+            self.append(BookmarkListItem(name, value=value))
     
     def add_bookmark(self, bucket_name: str, bookmark_name: str, bookmark_value: str) -> None:
         bookmarks = self.read_bookmark()
         
         # Get bucket bookmarks or create a new one if it not already exists
-        bucket_bookmark = bookmarks.get(bucket_name, {"bookmarks": []})
+        bucket_bookmark: dict[str, list] = bookmarks.get(bucket_name, {"bookmarks": []})
         
         bucket_bookmark["bookmarks"].append({"name": bookmark_name, "value": bookmark_value})
         
         self.write_bookmark(bookmarks)
         self.load_bookmark(bucket_name)
 
-
-class BookmarkListItem(ListItem):
-        """ A bookmark item """
+    def remove_bookmark(self, bucket_name: str) -> None:
+        bookmarks = self.read_bookmark()
         
-        __slots__ = ("value", )
+        # Get bucket bookmarks or create a new one if it not already exists
+        bucket_bookmark: dict[str, list] = bookmarks[bucket_name]
         
-        def __init__(self, *children, name = None, id = None, classes = None, disabled = False, markup = True, value: str = ""):
-            super().__init__(*children, name=name, id=id, classes=classes, disabled=disabled, markup=markup)
-            self.value = value
+        bucket_bookmark["bookmarks"].pop(self.index)
+        self.pop(self.index)
+        
+        self.write_bookmark(bookmarks)
+        self.load_bookmark(bucket_name)
+    
+    def action_remove_bookmark(self) -> None:
+        select_widget = self.app.query_one(Select)
+        bucket_name = select_widget.value
+        
+        if self.index is not None:
+            self.logger.info(f"Removing bookmark item at index {self.index} ({self.highlighted_child.name}) from the list view")
+            self.remove_bookmark(bucket_name)

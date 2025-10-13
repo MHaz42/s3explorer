@@ -7,7 +7,7 @@ from textual.containers import Container
 
 from s3explorer.s3 import S3
 from s3explorer.version import VERSION
-from s3explorer.widgets import ExplorerTable, Bookmark, URIInput
+from s3explorer.widgets import ExplorerTable, Bookmark, AddBookmarkScreen, URIInput
 
 
 class S3Explorer(App):
@@ -21,7 +21,7 @@ class S3Explorer(App):
         ("ctrl+b", "add_bookmark", "Add bookmark"),
     ]
 
-    logger = logging.getLogger("Bookmark")
+    logger = logging.getLogger("S3Explorer")
 
     s3_client = S3()
 
@@ -46,7 +46,7 @@ class S3Explorer(App):
 
     @on(Select.Changed)
     def select_changed(self, event: Select.Changed) -> None:
-        self.logger.info(f"{event.value = }")
+        self.logger.info(f"Selected bucket: {event.value}")
         table = self.query_one(ExplorerTable)
         table.update_bucket(str(event.value))
         bookmark = self.query_one(Bookmark)
@@ -56,7 +56,7 @@ class S3Explorer(App):
 
     @on(Bookmark.Selected)
     def bookmark_selected(self, event: Bookmark.Selected) -> None:
-        self.logger.info(f"Enter pressed on Bookmark: {event.item.value = }")
+        self.logger.info(f"Selected bookmark: {event.item.value = }")
         bookmark_path = event.item.value
         input_widget = self.query_one(URIInput)
         input_widget.update_path(bookmark_path)
@@ -79,12 +79,16 @@ class S3Explorer(App):
         uri_input.navigate_forward(event.new_dir_level)
 
     def action_add_bookmark(self) -> None:
-        # TODO: Create a new dialog with an Input to ask user for the bookmark name
         select_widget = self.query_one(Select)
         bucket_name = select_widget.value
         input_widget = self.query_one(Input)
         bookmark_value = input_widget.value
-        bookmark_name = ""
 
-        bookmark_widget = self.query_one(Bookmark)
-        bookmark_widget.add_bookmark(str(bucket_name), bookmark_name, bookmark_value)
+        def add_bookmark(bookmark_name: str | None) -> None:
+            bookmark_widget = self.query_one(Bookmark)
+            self.logger.info(f"{bucket_name = }, {bookmark_name = }, {bookmark_value = }")
+            if bookmark_name:
+                self.logger.info("Bookmark added")
+                bookmark_widget.add_bookmark(str(bucket_name), bookmark_name, bookmark_value)
+        
+        self.push_screen(AddBookmarkScreen(), callback=add_bookmark)
