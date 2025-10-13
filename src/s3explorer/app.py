@@ -80,15 +80,14 @@ class S3Explorer(App):
 
     def action_add_bookmark(self) -> None:
         select_widget = self.query_one(Select)
-        bucket_name = select_widget.value
+        bucket_name = str(select_widget.value)
         input_widget = self.query_one(Input)
         bookmark_value = input_widget.value
 
         def add_bookmark(bookmark_name: str | None) -> None:
             bookmark_widget = self.query_one(Bookmark)
-            self.logger.info(f"{bucket_name = }, {bookmark_name = }, {bookmark_value = }")
             if bookmark_name:
                 self.logger.info("Bookmark added")
-                bookmark_widget.add_bookmark(str(bucket_name), bookmark_name, bookmark_value)
+                bookmark_widget.add_bookmark(bucket_name, bookmark_name, bookmark_value)
         
         self.push_screen(AddBookmarkScreen(), callback=add_bookmark)

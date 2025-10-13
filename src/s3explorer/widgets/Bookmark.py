@@ -135,7 +135,7 @@ class Bookmark(ListView):
     
     def action_remove_bookmark(self) -> None:
         select_widget = self.app.query_one(Select)
-        bucket_name = select_widget.value
+        bucket_name = str(select_widget.value)
         
         if self.index is not None:
             self.logger.info(f"Removing bookmark item at index {self.index} ({self.highlighted_child.name}) from the list view")
