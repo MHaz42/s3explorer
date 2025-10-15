@@ -40,7 +40,7 @@ class Bookmark(ListView):
     logger = logging.getLogger("Bookmark")
     
     BINDINGS = [
-        ("delete", "remove_bookmark", "Remove highligthed bookamrk"),
+        ("delete", "remove_bookmark", "Remove highlighted bookmark"),
     ]
     
     class Selected(ListView.Selected):
@@ -64,12 +64,18 @@ class Bookmark(ListView):
             bookmark_file.touch()
         return bookmark_file
 
-    def read_bookmark(self) -> dict:
+    def read_bookmark(self) -> dict[str, dict[str, list[dict[str, str]]]]:
         bookmark_file = self.get_bookmark_file()
+        
+        bookmarks = {}
         
         self.logger.debug(f"Reading bookmarks from {bookmark_file}")
         with open(bookmark_file) as fd:
-            bookmarks = json.load(fd)
+            try:
+                bookmarks = json.load(fd)
+            except json.JSONDecodeError:
+                pass
+            
         return bookmarks
     
     def write_bookmark(self, bookmarks: dict) -> None:
@@ -99,11 +105,11 @@ class Bookmark(ListView):
         
         bookmarks = self.read_bookmark()
         
-        try:
-            bucket_bookmark = bookmarks[bucket_name]
-        except KeyError:
+        if not bookmarks.get(bucket_name, {}).get("bookmarks", []):
             self.logger.info(f"No bookmark found for bucket: {bucket_name}")
             return
+        else:
+            bucket_bookmark = bookmarks[bucket_name]
         
         for i, bookmark in enumerate(bucket_bookmark["bookmarks"]):
             name = Label(bookmark["name"])
@@ -114,9 +120,10 @@ class Bookmark(ListView):
         bookmarks = self.read_bookmark()
         
         # Get bucket bookmarks or create a new one if it not already exists
-        bucket_bookmark: dict[str, list] = bookmarks.get(bucket_name, {"bookmarks": []})
+        bucket_bookmark: dict[str, list[dict[str, str]]] = bookmarks.get(bucket_name, {"bookmarks": []})
         
         bucket_bookmark["bookmarks"].append({"name": bookmark_name, "value": bookmark_value})
+        bookmarks[bucket_name] = bucket_bookmark
         
         self.write_bookmark(bookmarks)
         self.load_bookmark(bucket_name)
@@ -125,9 +132,10 @@ class Bookmark(ListView):
         bookmarks = self.read_bookmark()
         
         # Get bucket bookmarks or create a new one if it not already exists
-        bucket_bookmark: dict[str, list] = bookmarks[bucket_name]
+        bucket_bookmark: dict[str, list[dict[str, str]]] = bookmarks[bucket_name]
         
         bucket_bookmark["bookmarks"].pop(self.index)
+        bookmarks[bucket_name] = bucket_bookmark
         self.pop(self.index)
         
         self.write_bookmark(bookmarks)
@@ -138,5 +146,5 @@ class Bookmark(ListView):
         bucket_name = str(select_widget.value)
         
         if self.index is not None:
-            self.logger.info(f"Removing bookmark item at index {self.index} ({self.highlighted_child.name}) from the list view")
+            self.logger.info(f"Removing bookmark item at index {self.index} from the list view")
             self.remove_bookmark(bucket_name)
